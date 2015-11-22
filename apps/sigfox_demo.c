@@ -165,6 +165,25 @@ dynamic_memory_init ( void )
 }
 
 
+void blink_leds(void)
+{
+	int i;
+	for(i = 0; i < 10; i++)
+	{
+		bspLedClear(BSP_LED_2);
+		bspLedSet(BSP_LED_1);
+
+		__delay_cycles(1600000/2);
+		bspLedClear(BSP_LED_1);
+		bspLedSet(BSP_LED_2);
+
+		__delay_cycles(1600000/2);
+	}
+	bspLedClear(BSP_LED_1);
+	bspLedClear(BSP_LED_2);
+}
+
+
 /***************************************************************************//**
  *   @brief      Runs the main routine
  *
@@ -232,6 +251,7 @@ main(void)
 	///////////////END OF NEW  CODE (1 OF 2)////////////////////////
 
 
+
 	// Infinite loop
 	for(;;)
 	{
@@ -240,43 +260,43 @@ main(void)
 
 		doorSensor = GPIO_getInputPinValue( GPIO_PORT_P2, GPIO_PIN4);		//read and store value of digital input pin 4 on port 2 (P2.4)
 
-		if (doorStatus != doorSensor || doorSensor == 1){		//if the state of the door has changed, or the door is open (regardless of state change), trigger transmission sequence
+		if ( doorSensor == 0 ){		//if the state of the door has changed, or the door is open (regardless of state change), trigger transmission sequence
 
 			doorStatus = doorSensor;	//update previous door status to current door status
-
-			if (doorSensor == GPIO_INPUT_PIN_LOW){		//if port P2.4 has LOW input (0), the door has been closed
-
-
-				P1OUT |= 0b00100000;		//turn on LED connected to output port P1.5
+			blink_leds();
 
 
-				message[11] = 0x00;		//door closed
-				err = SfxSendFrame(message, sizeof(message), NULL, NULL);		//transmit message to sigfox network that the door has been closed
-				__delay_cycles(16000000);
-
-				if (err == SFX_ERR_NONE) {
-					P1OUT &= ~0b00100000;	//turn off LED connected to output port P1.5
-					__delay_cycles(160000000);	//delay door checking for ten seconds
-				}
-
-
-			}
-
-			if (doorSensor == GPIO_INPUT_PIN_HIGH){		//if port P2.4 has LOW input (0), the door has been opened
-
-				P1OUT |= 0b00100000;		//turn on LED connected to output port P1.5
-
-				message[11] = 0x01;		//door open
-				err = SfxSendFrame(message, sizeof(message), NULL, NULL);
-				__delay_cycles(16000000);
-
-				if (err == SFX_ERR_NONE) {
-
-					P1OUT &= ~0b00100000;		//turn off LED connected to output port P1.5
-					__delay_cycles(160000000);
-				}
-
-			}
+//			if (doorSensor == GPIO_INPUT_PIN_LOW){		//if port P2.4 has LOW input (0), the door has been closed
+//
+//
+//				P1OUT |= 0b00100000;		//turn on LED connected to output port P1.5
+//
+//
+//				message[11] = 0x00;		//door closed
+//				err = SfxSendFrame(message, sizeof(message), NULL, NULL);		//transmit message to sigfox network that the door has been closed
+//				__delay_cycles(16000000);
+//
+//				if (err == SFX_ERR_NONE) {
+//					P1OUT &= ~0b00100000;	//turn off LED connected to output port P1.5
+//					__delay_cycles(160000000);	//delay door checking for ten seconds
+//				}
+//			}
+//
+//			if (doorSensor == GPIO_INPUT_PIN_HIGH) {		//if port P2.4 has LOW input (0), the door has been opened
+//
+//				P1OUT |= 0b00100000;		//turn on LED connected to output port P1.5
+//
+//				message[11] = 0x01;		//door open
+//				err = SfxSendFrame(message, sizeof(message), NULL, NULL);
+//				__delay_cycles(16000000);
+//
+//				if (err == SFX_ERR_NONE) {
+//
+//					P1OUT &= ~0b00100000;		//turn off LED connected to output port P1.5
+//					__delay_cycles(160000000);
+//				}
+//			}
+//
 		}
 
 
