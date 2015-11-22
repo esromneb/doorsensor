@@ -262,9 +262,17 @@ main(void)
 
 		if ( doorSensor == 0 ){		//if the state of the door has changed, or the door is open (regardless of state change), trigger transmission sequence
 
-			doorStatus = doorSensor;	//update previous door status to current door status
+//			doorStatus = doorSensor;	//update previous door status to current door status
 			blink_leds();
 
+			message[11] = 0x00;		//door closed
+			err = SfxSendFrame(message, sizeof(message), NULL, NULL);		//transmit message to sigfox network that the door has been closed
+			__delay_cycles(16000000); // sleep 10 seconds
+			if (err == SFX_ERR_NONE) {
+				P1OUT &= ~0b00100000;	//turn off LED connected to output port P1.5
+				__delay_cycles(160000000);	//delay door checking for ten seconds
+			}
+			blink_leds();
 
 //			if (doorSensor == GPIO_INPUT_PIN_LOW){		//if port P2.4 has LOW input (0), the door has been closed
 //
